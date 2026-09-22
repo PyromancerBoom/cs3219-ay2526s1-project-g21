@@ -4,7 +4,14 @@ This project is a full-stack collaborative coding platform inspired by the exper
 
 ## Demo
 
-[Watch the 44-second demo](docs/media/peerprep-demo.mp4) — question browsing, matchmaking, shared editing, code execution, and session history. Captions included; no audio.
+Skip the long intros, here's the demo of the platform in action. It showcases matchmaking, collaborative editing, code execution, and AI assistance:
+
+<video controls width="800">
+  <source src="docs/media/peerprep-demo.mp4" type="video/mp4">
+  Your browser does not support the video tag.
+</video>
+
+Question browsing, matchmaking, shared editing, code execution, and session history. Captions included; no audio.
 
 ### Find a practice partner
 
@@ -14,12 +21,9 @@ This project is a full-stack collaborative coding platform inspired by the exper
 
 ![The same Python code synchronized across two users' editors](docs/media/collaborative-editor.png)
 
-<details>
-<summary>Browse the question bank</summary>
+### Browse the question bank
 
 ![Question details with examples and constraints](docs/media/questions.png)
-
-</details>
 
 ## Table of Contents
 

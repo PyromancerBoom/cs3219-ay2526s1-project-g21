@@ -8,27 +8,27 @@ scrape_configs:
       - targets: ["prometheus:9090"]
 
   - job_name: "user"
-    metrics_path: /metrics
+    metrics_path: /api/v1/users/metrics
     static_configs:
       - targets: ["user:8080"]
 
   - job_name: "question"
-    metrics_path: /metrics
+    metrics_path: /api/v1/questions/metrics
     static_configs:
       - targets: ["question:8080"]
 
   - job_name: "match"
-    metrics_path: /metrics
+    metrics_path: /api/v1/match/metrics
     static_configs:
       - targets: ["match:8080"]
 
   - job_name: "collab"
-    metrics_path: /metrics
+    metrics_path: /api/v1/collab/metrics
     static_configs:
       - targets: ["collab:8080"]
 
   - job_name: "voice"
-    metrics_path: /metrics
+    metrics_path: /api/v1/voice/metrics
     static_configs:
       - targets: ["voice:8080"]
 

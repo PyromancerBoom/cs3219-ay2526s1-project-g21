@@ -83,9 +83,9 @@ export default function InterviewLobby() {
     { name: "System Design", value: "System_Design" },
   ];
 
-  const [form, setForm] = useState<{ category: Category; difficulty: Difficulty }>({
-    category: categories[0],
-    difficulty: difficulties[0],
+  const [form, setForm] = useState<{ category: string; difficulty: string }>({
+    category: categories[0].value,
+    difficulty: difficulties[0].value,
   });
 
   // Function to wait for room to be ready
@@ -144,7 +144,7 @@ export default function InterviewLobby() {
   };
 
   const startSearching = () => {
-    joinQueue(user?.id, form.category.value, form.difficulty.value)
+    joinQueue(user?.id, form.category, form.difficulty)
     setInQueue(true);
     criteria2MessageTimer.current = setTimeout(() => {
       if (!roomId) {

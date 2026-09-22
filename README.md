@@ -2,6 +2,25 @@
 
 This project is a full-stack collaborative coding platform inspired by the experience of solving problems on LeetCode, but extended with real-time teamwork and AI-powered assistance. It provides an environment where multiple users can simultaneously work on programming challenges, discuss ideas through an integrated chat system, run their code in a secure sandbox, and get generative AI support for hints, debugging, and explanations.
 
+## Demo
+
+[Watch the 44-second demo](docs/media/peerprep-demo.mp4) — question browsing, matchmaking, shared editing, code execution, and session history. Captions included; no audio.
+
+### Find a practice partner
+
+![Two users matched by topic and difficulty](docs/media/matchmaking.png)
+
+### Code together
+
+![The same Python code synchronized across two users' editors](docs/media/collaborative-editor.png)
+
+<details>
+<summary>Browse the question bank</summary>
+
+![Question details with examples and constraints](docs/media/questions.png)
+
+</details>
+
 ## Table of Contents
 
 1. [Platform Overview](#platform-overview)
@@ -82,17 +101,20 @@ Everything is decomposed into Go microservices behind lightweight REST/WebSocket
 | Node.js + npm | Node 18+ | Needed for Vite dev server and frontend builds |
 | Make / Bash | Optional | Helpful for scripting; Windows users can use WSL2 or provided `.bat/.ps1` helpers |
 
+For the frontend, Node.js 20 is recommended because the deployment workflow builds with Node 20. Docker Desktop should be running Linux containers on Windows; the sandbox needs access to the Docker daemon.
+
 ## Environment Configuration
 
 1. **Backend / Docker Compose**
    ```bash
    cp .env.example .env
    ```
-   - Populate database credentials, SMTP config, and AI-related fields.
-   - For the AI service, supply a Gemini API key or configure a Google service account. When using a service account:
+   - Populate database credentials, SMTP config, and AI-related fields. Set `JWT_SECRET` to a long, private value shared by the user, match, collab, and voice services.
+   - The current AI service requires `GEMINI_API_KEY`. A Google service account can also be configured for Google Cloud features, but does not replace that key. When using a service account:
      1. Place the downloaded key under `secrets/service-account-key.json`.
      2. Set `GOOGLE_APPLICATION_CREDENTIALS=/secrets/service-account-key.json` inside `.env`.
-   - Windows-friendly helpers `load-env.bat` / `load-env.ps1` export the same variables for local runs.
+   - The `load-env.bat` / `load-env.ps1` helpers load AWS credentials from `.env` for deployment tasks; Docker Compose reads `.env` directly.
+   - The example SMTP values are placeholders. Use the seeded verified accounts below to explore the app without configuring email.
 
 2. **Frontend**
    ```bash
@@ -112,6 +134,8 @@ Everything is decomposed into Go microservices behind lightweight REST/WebSocket
 ```bash
 docker compose -f deploy/docker-compose.yaml up --build
 ```
+
+Compose starts the backend, datastores, and monitoring services. Run the Vite frontend from Option 2 in a second terminal to open the complete app.
 
 What this gives you:
 
@@ -150,10 +174,14 @@ npm run dev # starts on http://localhost:5173
 
 Ensure the `.env` points to running backend endpoints (Docker or remote).
 
+### First-run demo
+
+Open `http://localhost:5173` and sign in as `test_1` or `test_2` with password `Password123!` after seeding. To try matchmaking and the shared editor, use separate browser profiles for the two accounts. AI requests also need a real `GEMINI_API_KEY`; account registration and email flows need working SMTP settings.
+
 ## Observability & Ops
 
 - User, question, collab, voice, and sandbox wrap handlers with `internal/metrics`; their endpoints live at `/api/v1/<service>/metrics` (sandbox uses `/metrics`). Match exposes `/api/v1/match/metrics` without the middleware, and the AI service currently has no Prometheus endpoint.
-- Prometheus (`deploy/prometheus/prometheus.yml`) defines scrape jobs for user, question, match, collab, voice, and sandbox. Update each job's `metrics_path` (default `/metrics`) or add passthrough routes before expecting samples, and add an `ai` job if needed.
+- Prometheus (`deploy/prometheus/prometheus.yml`) defines scrape jobs for user, question, match, collab, voice, and sandbox using their current metrics paths; add an `ai` job if needed.
 - Grafana ships with a provisioned **PeerPrep Services Overview** dashboard under `deploy/grafana/`; access via `http://localhost:3000` (admin/admin).
 - Add or tweak dashboards by editing `deploy/grafana/dashboards/` and restarting the Grafana container to reload them.
 - Logs stream to stdout (zap in user/question, stdlib loggers elsewhere). Inspect with `docker compose logs -f <service>`.
@@ -165,7 +193,7 @@ Ensure the `.env` points to running backend endpoints (Docker or remote).
   cd services/<service>
   go test ./... -cover
   ```
-  - CI (`.github/workflows/ci.yml`) runs lint + tests for every service on pushes/PRs and produces per-service coverage badges.
+  - CI (`.github/workflows/ci.yml`) runs lint + tests for every service on pushes/PRs and produces per-service coverage badges as workflow artifacts.
 
 - **Frontend**
   ```bash
@@ -184,7 +212,7 @@ Ensure the `.env` points to running backend endpoints (Docker or remote).
 | `ai` service fails to start | Missing Gemini API key or `GOOGLE_APPLICATION_CREDENTIALS` path | Populate `.env` and mount `secrets/` volume |
 | Frontend cannot connect via WebSockets | Using `http://` instead of `ws://` in `.env` | Update `VITE_*_WEBSOCKET_BASE` to `ws://localhost:PORT` |
 | Seed scripts exit early | Databases not ready | Rerun `mongo-seed`/`postgres-seed` after `docker compose up` shows Mongo/Postgres healthy |
-| Grafana dashboards empty | Prometheus scraping `/metrics` while services expose `/api/v1/<svc>/metrics` | Update `metrics_path` in `deploy/prometheus/prometheus.yml` or expose `/metrics` routes before reloading Prometheus |
+| Grafana dashboards empty | No traffic yet, or a Prometheus target is down | Check `http://localhost:9090/targets`, then generate a few requests before checking rate panels |
 
 ## Disclaimer on AI Usage
 

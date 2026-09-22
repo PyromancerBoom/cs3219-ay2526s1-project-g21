@@ -164,15 +164,67 @@ export function QuestionModal({ question, onClose }: QuestionModalProps) {
           {question.constraints && (
             <div>
               <h3 className="text-sm font-semibold text-gray-900 mb-2">Constraints</h3>
-              <div className="bg-gray-50 rounded p-2.5">
-                <ul className="space-y-0.5 text-xs text-gray-700 font-mono">
-                  {question.constraints.split('\n').map((constraint, index) => (
-                    <li key={index} className="flex items-start">
-                      <span className="mr-2">•</span>
-                      <span className="flex-1">{constraint}</span>
-                    </li>
-                  ))}
-                </ul>
+              <div className="prose prose-sm max-w-none text-xs">
+                <ReactMarkdown
+                  components={{
+                    code({ className, children, ...props }) {
+                      const match = /language-(\w+)/.exec(className || "");
+                      const isInline = !match;
+                      return !isInline ? (
+                        <SyntaxHighlighter
+                          style={oneDark as any}
+                          language={match[1]}
+                          PreTag="div"
+                          customStyle={{ fontSize: '0.75rem' }}
+                        >
+                          {String(children).replace(/\n$/, "")}
+                        </SyntaxHighlighter>
+                      ) : (
+                        <code className="text-[0.7rem] bg-gray-100 px-1 py-0.5 rounded" {...props}>
+                          {children}
+                        </code>
+                      );
+                    },
+                    h1: ({ node, ...props }) => (
+                      <h1 className="text-base font-bold text-gray-900 mt-3 mb-1.5" {...props} />
+                    ),
+                    h2: ({ node, ...props }) => (
+                      <h2 className="text-sm font-semibold text-gray-900 mt-2.5 mb-1.5" {...props} />
+                    ),
+                    h3: ({ node, ...props }) => (
+                      <h3 className="text-xs font-semibold text-gray-900 mt-2 mb-1" {...props} />
+                    ),
+                    p: ({ node, ...props }) => (
+                      <p className="text-xs text-gray-700 leading-relaxed mb-1.5" {...props} />
+                    ),
+                    ul: ({ node, ...props }) => (
+                      <ul className="list-disc list-inside space-y-0.5 text-xs text-gray-700 mb-1.5" {...props} />
+                    ),
+                    ol: ({ node, ...props }) => (
+                      <ol className="list-decimal list-inside space-y-0.5 text-xs text-gray-700 mb-1.5" {...props} />
+                    ),
+                    li: ({ node, ...props }) => (
+                      <li className="text-xs text-gray-700 ml-2" {...props} />
+                    ),
+                    pre: ({ node, ...props }) => (
+                      <pre className="bg-gray-50 rounded p-2.5 overflow-x-auto mb-1.5 text-[0.7rem]" {...props} />
+                    ),
+                    blockquote: ({ node, ...props }) => (
+                      <blockquote className="border-l-4 border-gray-300 pl-2.5 italic text-gray-600 text-xs mb-1.5" {...props} />
+                    ),
+                    strong: ({ node, ...props }) => (
+                      <strong className="font-semibold text-gray-900" {...props} />
+                    ),
+                    em: ({ node, ...props }) => (
+                      <em className="italic text-gray-700" {...props} />
+                    ),
+                    a: ({ node, ...props }) => (
+                      <a className="text-blue-600 hover:underline text-xs" {...props} />
+                    ),
+                  }}
+                >
+                  {question.constraints}
+                </ReactMarkdown>
               </div>
             </div>
           )}

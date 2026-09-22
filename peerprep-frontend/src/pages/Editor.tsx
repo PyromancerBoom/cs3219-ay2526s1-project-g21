@@ -809,15 +809,38 @@ export default function Editor() {
             {question?.constraints && (
               <div className="p-5">
                 <h3 className="text-sm font-semibold text-gray-900 mb-3">Constraints</h3>
-                <div className="text-xs text-gray-700 space-y-1">
-                  {question.constraints.split('\n').map((constraint, idx) => (
-                    constraint.trim() && (
-                      <div key={idx} className="flex items-start gap-2">
-                        <span className="text-gray-400 mt-0.5">•</span>
-                        <span className="font-mono">{constraint.trim()}</span>
-                      </div>
-                    )
-                  ))}
+                <div className="prose prose-sm max-w-none text-sm">
+                  <ReactMarkdown
+                    components={{
+                      code({ node, inline, className, children, ...props }: any) {
+                        const match = /language-(\w+)/.exec(className || '');
+                        const language = match ? match[1] : '';
+                        return !inline && language ? (
+                          <SyntaxHighlighter
+                            style={oneDark}
+                            language={language}
+                            PreTag="div"
+                            customStyle={{ fontSize: '0.875rem', marginTop: '0.5rem', marginBottom: '0.5rem' }}
+                            {...props}
+                          >
+                            {String(children).replace(/\n$/, '')}
+                          </SyntaxHighlighter>
+                        ) : (
+                          <code className="bg-gray-100 px-1.5 py-0.5 rounded text-sm font-mono text-pink-600" {...props}>
+                            {children}
+                          </code>
+                        );
+                      },
+                      p: ({ children }) => <p className="mb-3 leading-relaxed text-gray-700">{children}</p>,
+                      ul: ({ children }) => <ul className="list-disc list-inside mb-3 space-y-1 text-gray-700">{children}</ul>,
+                      ol: ({ children }) => <ol className="list-decimal list-inside mb-3 space-y-1 text-gray-700">{children}</ol>,
+                      li: ({ children }) => <li className="ml-4">{children}</li>,
+                      h3: ({ children }) => <h3 className="text-base font-semibold mb-2 mt-4 text-gray-900">{children}</h3>,
+                      strong: ({ children }) => <strong className="font-semibold text-gray-900">{children}</strong>,
+                    }}
+                  >
+                    {question.constraints}
+                  </ReactMarkdown>
                 </div>
               </div>
             )}
